@@ -7,6 +7,8 @@ gem 'rails', '3.2.3'
 
 gem 'mysql2'
 gem 'therubyracer'
+gem 'rmagick'
+gem 'carrierwave'
 
 
 # Gems used only for assets and not required

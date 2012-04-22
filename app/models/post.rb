@@ -1,7 +1,9 @@
 class Post < ActiveRecord::Base
-  attr_accessible :body, :title, :step
+  attr_accessible :body, :title, :step, :image, :image_cache
 
-  STEPS = [1, 2]
+  mount_uploader :image, ImageUploader
+
+  STEPS = [1, 2, 3]
 
   validates :title, :presence => true, :if => lambda { |p| p.step >= STEPS.first }
   validates :body, :presence => true, :if => lambda { |p| p.step >= STEPS.second }

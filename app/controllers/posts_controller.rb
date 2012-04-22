@@ -1,6 +1,4 @@
 class PostsController < ApplicationController
-  helper_method :current_step, :first_step?, :last_step?
-
   # GET /posts
   # GET /posts.json
   def index
@@ -38,15 +36,17 @@ class PostsController < ApplicationController
   # GET /posts/1/edit
   def edit
     @post = Post.find(params[:id])
+    session[:step] = @post.step = Post::STEPS.first
   end
 
   # POST /posts
   # POST /posts.json
   def create
     session[:post] ||= {}
-    session[:post].deep_merge!(params[:post])
+    session[:post].deep_merge!(params[:post].except(:image))
 
     @post = Post.new(session[:post])
+    @post.image = params[:post][:image]
     @post.step = session[:step]
 
     if params[:prev_step].present?
@@ -67,16 +67,23 @@ class PostsController < ApplicationController
   # PUT /posts/1.json
   def update
     @post = Post.find(params[:id])
+    session[:post] ||= {}
+    session[:post].deep_merge!(params[:post].except(:image))
+    @post.step = session[:step]
 
-    respond_to do |format|
-      if @post.update_attributes(params[:post])
-        format.html { redirect_to @post, notice: 'Post was successfully updated.' }
-        format.json { head :no_content }
+    if params[:prev_step].present?
+      session[:step] = @post.prev_step
+    else
+      if @post.last_step? && @post.all_valid?
+        @post.image = params[:post][:image]
+        @post.update_attributes(session[:post])
+        clear_post_session
+        redirect_to @post, notice: 'Post was successfully updated.' and return
       else
-        format.html { render action: "edit" }
-        format.json { render json: @post.errors, status: :unprocessable_entity }
+        session[:step] = @post.next_step if @post.valid?
       end
     end
+    render :edit
   end
 
   # DELETE /posts/1
