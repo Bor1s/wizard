@@ -1,12 +1,16 @@
 class Post < ActiveRecord::Base
+  TITLE_STEP = "title"
+  DESCRIPTION_STEP = "description"
+  IMAGE_STEP = "image"
+
+  STEPS = [TITLE_STEP, DESCRIPTION_STEP, IMAGE_STEP]
+
   attr_accessible :body, :title, :step, :image, :image_cache
 
   mount_uploader :image, ImageUploader
 
-  STEPS = [1, 2, 3]
-
-  validates :title, :presence => true, :if => lambda { |p| p.step >= STEPS.first }
-  validates :body, :presence => true, :if => lambda { |p| p.step >= STEPS.second }
+  validates :title, :presence => true, :if => :step_title?
+  validates :body, :presence => true, :if => :step_description?
 
   def step
     @step
@@ -42,4 +46,19 @@ class Post < ActiveRecord::Base
   def last_step?
     self.step == STEPS.last
   end
+
+  private
+
+  def step_title?
+    self.step == TITLE_STEP
+  end
+
+  def step_description?
+    self.step == DESCRIPTION_STEP
+  end
+
+  def step_image?
+    self.step == IMAGE_STEP
+  end
+
 end
