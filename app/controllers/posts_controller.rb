@@ -49,6 +49,7 @@ class PostsController < ApplicationController
     @post.image = params[:post][:image]
     @post.step = session[:step]
 
+
     if params[:prev_step].present?
       session[:step] = @post.prev_step
     else
@@ -69,6 +70,7 @@ class PostsController < ApplicationController
     @post = Post.find(params[:id])
     session[:post] ||= {}
     session[:post].deep_merge!(params[:post].except(:image))
+    @post.attributes = session[:post]
     @post.step = session[:step]
 
     if params[:prev_step].present?
